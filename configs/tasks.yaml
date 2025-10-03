@@ -1,0 +1,4 @@
+tasks:
+  - name: build
+    command: go build ./cmd/taskrunner/main.go
+    depents_on: []

@@ -1,0 +1,33 @@
+# Binari compilati
+/bin/
+/build/
+/out/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+
+# Moduli e dipendenze
+/vendor/
+
+# File temporanei di Go
+*.test
+*.prof
+*.cover
+
+# Configurazioni e cache IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Configurazioni locali
+.env
