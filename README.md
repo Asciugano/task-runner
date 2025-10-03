@@ -12,7 +12,7 @@ Un programma cli per eseguire script automaticamente(simile a npm)
 
   2. Se il nome del file non e task o non e' nella root del progetto:
   ```bash
-     task-runner --config-path </path/to/your/task.yaml>
+  task-runner --config-path </path/to/your/task.yaml>
 ```
 
 ## Avviare:

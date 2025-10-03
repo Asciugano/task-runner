@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -21,11 +22,61 @@ func Init(options models.CLIOptions) {
 
 	fmt.Println(tasks)
 
+	sorted, err := SortTasks(tasks)
+	if err != nil {
+		fmt.Errorf("Error in the task dependency: %w", err)
+	}
+	for _, t := range sorted {
+		RunTask(t, options)
+	}
+}
+
+func SortTasks(tasks models.Config) ([]models.Task, error) {
+	taskMap := make(map[string]models.Task)
 	for _, t := range tasks.Tasks {
-		if options.TaskName == t.Name {
-			RunTask(t, options)
+		taskMap[t.Name] = t
+	}
+
+	visited := make(map[string]bool)
+	tempMarked := make(map[string]bool)
+	var sorted []models.Task
+
+	var visit func(string) error
+	visit = func(name string) error {
+		if tempMarked[name] {
+			return errors.New("Circular dependency detectred at task: " + name)
+		}
+		if visited[name] {
+			return nil
+		}
+		tempMarked[name] = true
+
+		task, ok := taskMap[name]
+		if !ok {
+			return fmt.Errorf("task %s not found", name)
+		}
+
+		for _, dep := range task.DependsOn {
+			if err := visit(dep); err != nil {
+				return err
+			}
+		}
+
+		visited[name] = true
+		tempMarked[name] = false
+		sorted = append(sorted, task)
+		return nil
+	}
+
+	for _, t := range tasks.Tasks {
+		if !visited[t.Name] {
+			if err := visit(t.Name); err != nil {
+				return nil, err
+			}
 		}
 	}
+
+	return sorted, nil
 }
 
 func LoadTasks(path string) (models.Config, error) {
