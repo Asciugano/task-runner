@@ -16,11 +16,14 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
+		if len(args) < 1 && !opts.All {
 			cmd.PrintErrln("Please specify a task")
 			os.Exit(1)
+		} else {
+			if !opts.All {
+				opts.TaskName = args[0]
+			}
 		}
-		opts.TaskName = args[0]
 	},
 }
 
@@ -37,6 +40,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "v", false, "Show verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&opts.All, "all", "A", false, "Run all tasks")
 	rootCmd.PersistentFlags().IntVarP(&opts.Concurrency, "concurrency", "c", 1, "Number of tasks in parallel")
 	rootCmd.PersistentFlags().BoolVarP(&opts.DryRun, "dry-run", "d", false, "Do not execute tasks")
 	rootCmd.PersistentFlags().BoolVar(&opts.ContinueOnError, "continue-on-error", false, "Continue on error")

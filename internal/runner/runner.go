@@ -20,16 +20,27 @@ func Init(options models.CLIOptions) {
 		os.Exit(1)
 	}
 
-	for _, t := range tasks.Tasks {
-		if t.Name == options.TaskName {
-			if len(t.DependsOn) > 0 {
-				tasks := SearchTasks(tasks, t.DependsOn)
-				for _, dep := range tasks {
-					RunTask(dep, options)
+	if options.All {
+		sorted, err := SortTasks(tasks)
+		if err != nil {
+			fmt.Println("Error sorting the dependency: ", err)
+			os.Exit(1)
+		}
+		for _, t := range sorted {
+			RunTask(t, options)
+		}
+	} else {
+		for _, t := range tasks.Tasks {
+			if t.Name == options.TaskName {
+				if len(t.DependsOn) > 0 {
+					tasks := SearchTasks(tasks, t.DependsOn)
+					for _, dep := range tasks {
+						RunTask(dep, options)
+					}
+					RunTask(t, options)
+				} else {
+					RunTask(t, options)
 				}
-				RunTask(t, options)
-			} else {
-				RunTask(t, options)
 			}
 		}
 	}
@@ -39,7 +50,6 @@ func SearchTasks(config models.Config, names []string) []models.Task {
 	var tasks []models.Task
 	idx := 0
 	for _, t := range config.Tasks {
-		fmt.Println(t.Name)
 		if t.Name == names[idx] {
 			tasks = append(tasks, t)
 			idx++

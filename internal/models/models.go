@@ -14,6 +14,7 @@ type Config struct {
 
 type CLIOptions struct {
 	TaskName string
+	All      bool
 
 	ConfigPath      string
 	Concurrency     int
