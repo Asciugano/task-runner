@@ -129,6 +129,7 @@ func LoadTasks(path string) (models.Config, error) {
 func RunTask(t models.Task, opts models.CLIOptions) error {
 	fmt.Println("Running task: ", t.Name)
 	fmt.Println("[*] => ", t.Command)
+	fmt.Println("")
 
 	if opts.DryRun {
 		fmt.Println("[*][*] DryRun: not executing command")
@@ -159,6 +160,8 @@ func RunTask(t models.Task, opts models.CLIOptions) error {
 	if err != nil {
 		return fmt.Errorf("[*][*] task %s failed: %w", t.Name, err)
 	}
+
+	fmt.Println()
 
 	return nil
 }
