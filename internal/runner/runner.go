@@ -20,15 +20,36 @@ func Init(options models.CLIOptions) {
 		os.Exit(1)
 	}
 
-	fmt.Println(tasks)
+	for _, t := range tasks.Tasks {
+		if t.Name == options.TaskName {
+			if len(t.DependsOn) > 0 {
+				tasks := SearchTasks(tasks, t.DependsOn)
+				for _, dep := range tasks {
+					RunTask(dep, options)
+				}
+				RunTask(t, options)
+			} else {
+				RunTask(t, options)
+			}
+		}
+	}
+}
 
-	sorted, err := SortTasks(tasks)
-	if err != nil {
-		fmt.Errorf("Error in the task dependency: %w", err)
+func SearchTasks(config models.Config, names []string) []models.Task {
+	var tasks []models.Task
+	idx := 0
+	for _, t := range config.Tasks {
+		fmt.Println(t.Name)
+		if t.Name == names[idx] {
+			tasks = append(tasks, t)
+			idx++
+			if idx >= len(names) {
+				return tasks
+			}
+		}
 	}
-	for _, t := range sorted {
-		RunTask(t, options)
-	}
+
+	return tasks
 }
 
 func SortTasks(tasks models.Config) ([]models.Task, error) {
@@ -120,10 +141,9 @@ func RunTask(t models.Task, opts models.CLIOptions) error {
 		mw := io.MultiWriter(os.Stdout, f)
 		cmd.Stdout = mw
 		cmd.Stderr = mw
-	} else if opts.Verbose {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
 	}
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 
 	err := cmd.Run()
 	if err != nil {
