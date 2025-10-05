@@ -6,14 +6,20 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 
+	createtemplate "github.com/Asciugano/taskRunner/internal/createTemplate"
 	"github.com/Asciugano/taskRunner/internal/models"
 )
 
 func Init(options models.CLIOptions) {
+	if options.TaskName == "create" {
+		if options.Template == "c" {
+			createtemplate.CreateCTemplate()
+			return
+		}
+	}
 	tasks, err := LoadTasks(options.ConfigPath)
 	if err != nil {
 		fmt.Println("Error parsing the config file: ", err)
@@ -136,11 +142,10 @@ func RunTask(t models.Task, opts models.CLIOptions) error {
 		return nil
 	}
 
-	parts := strings.Fields(t.Command)
 	if opts.OutputFile != "" {
-		parts = append(parts[:2], append([]string{"-o", opts.OutputFile}, parts[2:]...)...)
+		t.Command += "-o " + opts.OutputFile
 	}
-	cmd := exec.Command(parts[0], parts[1:]...)
+	cmd := exec.Command("sh", "-c", t.Command)
 
 	if opts.OutputFile != "" {
 		f, err := os.OpenFile(opts.OutputFile, os.O_CREATE|os.O_EXCL|os.O_APPEND, 0644)

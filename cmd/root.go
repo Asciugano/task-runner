@@ -22,6 +22,13 @@ var rootCmd = &cobra.Command{
 		} else {
 			if !opts.All {
 				opts.TaskName = args[0]
+				if opts.TaskName == "create" {
+					if len(args) < 2 {
+						cmd.PrintErrln("Please specify the language of the project")
+						os.Exit(1)
+					}
+					opts.Template = args[1]
+				}
 			}
 		}
 	},
